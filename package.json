@@ -1,0 +1,29 @@
+{
+  "name": "payload-router",
+  "version": "0.0.0",
+  "description": "State-based router",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "repository": "https://github.com/soul-codes/ts-boilerplate",
+  "author": "soul-codes <reach.soul.codes@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "prepare": "rm -rf dist && tsc",
+    "start": "webpack-serve --config ./demo/webpack.config.js --content ./demo --port 9001",
+    "release": "release-it"
+  },
+  "devDependencies": {
+    "@types/react": "^16.3.18",
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.4",
+    "babel-preset-react": "^6.24.1",
+    "locus-dom": "^0.1.1",
+    "react": "^16.4.1",
+    "react-dom": "^16.4.1",
+    "release-it": "^7.4.7",
+    "ts-loader": "^4.4.1",
+    "typescript": "^2.9.1",
+    "webpack": "^4.12.0",
+    "webpack-serve": "^1.0.4"
+  }
+}
