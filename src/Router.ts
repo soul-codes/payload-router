@@ -18,6 +18,22 @@ export enum RoutingState {
   active = "active"
 }
 
+type Falsy = null | false | void;
+
+export interface IRouteHandler<TPayload> {
+  (payload: TPayload, helpers: IRouteHandlerHelpers<TPayload>):
+    | Promise<void>
+    | Falsy;
+}
+
+export interface IRouteTransducer<TPayload> {
+  (routeString: string): TPayload | Falsy;
+}
+
+export interface IRoutePresenter<TPayload> {
+  (payload: TPayload): string | Falsy;
+}
+
 export interface IRouterStateThunks<TPayload> {
   getState?(next: () => IRouterState<TPayload>): TPayload;
   setState?(next: () => any, newState: IRouterState<TPayload>): any;
@@ -38,12 +54,9 @@ export interface IRouteHandlerHelpers<TPayload> {
 }
 
 export interface IRouterSettings<TPayload> {
-  transducers: ((routeString: string) => TPayload | null)[];
-  presenters: ((payload: TPayload) => string | null)[];
-  handlers: ((
-    payload: TPayload,
-    helpers: IRouteHandlerHelpers<TPayload>
-  ) => false | Promise<void> | void)[];
+  transducers: IRouteTransducer<TPayload>[];
+  presenters: IRoutePresenter<TPayload>[];
+  handlers: IRouteHandler<TPayload>[];
   deferer?: (payload: TPayload) => boolean | Promise<boolean>;
   stateThunks?: IRouterStateThunks<TPayload>;
 }
@@ -92,7 +105,7 @@ export default class Router<TPayload> {
     for (let i = 0, length = transducers.length; i < length; i++) {
       const transducer = transducers[i];
       const payload = transducer(routeString);
-      if (payload !== null) return payload;
+      if (payload) return payload;
     }
 
     throw Error("Route string could not be transduced into a payload.");
@@ -103,7 +116,7 @@ export default class Router<TPayload> {
     for (let i = 0, length = presenters.length; i < length; i++) {
       const presenter = presenters[i];
       const routeString = presenter(payload);
-      if (routeString !== null) return routeString;
+      if (routeString) return routeString;
     }
 
     throw Error("Route payload could not be presented as string.");
