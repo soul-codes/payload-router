@@ -245,7 +245,7 @@ export default class Router<TPayload> {
     origin: TPayload | null,
     redirections: TPayload[]
   ) {
-    this._payloadChangeCallbacks.forEach(callback => callback());
+    this._replace(payload);
     return Promise.resolve(
       this.handle(payload, origin, [
         ...redirections,
