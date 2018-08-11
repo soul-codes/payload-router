@@ -39,6 +39,10 @@ export interface IRouterStateThunks<TPayload> {
   setState?(next: () => any, newState: IRouterState<TPayload>): any;
 }
 
+export interface IRouterDeferrer<TPayload> {
+  (payload: TPayload): boolean | Promise<boolean>;
+}
+
 export interface IRouterState<TPayload> {
   routingState: RoutingState;
   nextPayload: TPayload | null;
@@ -57,7 +61,7 @@ export interface IRouterSettings<TPayload> {
   transducers: IRouteTransducer<TPayload>[];
   presenters: IRoutePresenter<TPayload>[];
   handlers: IRouteHandler<TPayload>[];
-  deferer?: (payload: TPayload) => boolean | Promise<boolean>;
+  deferer?: IRouterDeferrer<TPayload>;
   stateThunks?: IRouterStateThunks<TPayload>;
 }
 
