@@ -21,8 +21,8 @@ export enum RoutingState {
 type Falsy = null | false | void;
 
 export interface IRouteHandler<
-  TPayload,
-  TOtherPayloads extends TPayload = TPayload
+  TPayload extends TOtherPayloads,
+  TOtherPayloads = TPayload
 > {
   (payload: TPayload, helpers: IRouteHandlerHelpers<TOtherPayloads>):
     | Promise<void>
