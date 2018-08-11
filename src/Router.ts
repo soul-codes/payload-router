@@ -272,3 +272,14 @@ export default class Router<TPayload> {
     return ((stateThunks && stateThunks.getState) || <any>defaultThunk)(next);
   }
 }
+
+export function transduceRegex<TPayload>(
+  regex: RegExp,
+  result: (...matches: string[]) => TPayload
+): IRouteTransducer<TPayload> {
+  return hash => {
+    const matches = regex.exec(hash);
+    if (!matches) return null;
+    return result(...matches);
+  };
+}
