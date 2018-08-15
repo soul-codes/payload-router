@@ -61,11 +61,15 @@ export interface IRouteHandlerHelpers<TPayload> {
 }
 
 export interface IRouterSettings<TPayload> {
-  transducers: IRouteTransducer<TPayload>[];
-  presenters: IRoutePresenter<TPayload>[];
-  handlers: IRouteHandler<TPayload>[];
+  routes: IRouteSettings<TPayload>[];
   deferer?: IRouterDeferrer<TPayload>;
   stateThunks?: IRouterStateThunks<TPayload>;
+}
+
+export interface IRouteSettings<TPayload> {
+  transducer: IRouteTransducer<TPayload>;
+  presenter: IRoutePresenter<TPayload>;
+  handler: IRouteHandler<TPayload>;
 }
 
 const defaultThunk = (next: Function) => next();
@@ -108,9 +112,9 @@ export default class Router<TPayload> {
   }
 
   transduce(routeString: string): TPayload {
-    const { transducers } = this.settings;
-    for (let i = 0, length = transducers.length; i < length; i++) {
-      const transducer = transducers[i];
+    const { routes } = this.settings;
+    for (let i = 0, length = routes.length; i < length; i++) {
+      const { transducer } = routes[i];
       const payload = transducer(routeString);
       if (payload) return payload;
     }
@@ -119,9 +123,9 @@ export default class Router<TPayload> {
   }
 
   present(payload: TPayload): string {
-    const { presenters } = this.settings;
-    for (let i = 0, length = presenters.length; i < length; i++) {
-      const presenter = presenters[i];
+    const { routes } = this.settings;
+    for (let i = 0, length = routes.length; i < length; i++) {
+      const { presenter } = routes[i];
       const routeString = presenter(payload);
       if (routeString) return routeString;
     }
@@ -134,9 +138,9 @@ export default class Router<TPayload> {
     origin: TPayload | null,
     redirections: TPayload[]
   ): Promise<void> {
-    const { handlers } = this.settings;
-    for (let i = 0, length = handlers.length; i < length; i++) {
-      const handler = handlers[i];
+    const { routes } = this.settings;
+    for (let i = 0, length = routes.length; i < length; i++) {
+      const { handler } = routes[i];
       const helpers = {
         origin,
         redirections,

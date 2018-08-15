@@ -17,31 +17,33 @@ interface IPage3 {
 const contentEl = <HTMLDivElement>document.getElementById("content");
 const deferEl = <HTMLDivElement>document.getElementById("defer");
 const router = new HistoryRouter<IPage1 | IPage2 | IPage3>({
-  transducers: [
-    route => {
-      const match = /^page2\/(.+)$/.exec(route);
-      return match ? { page: "page2", foo: match[1] } : null;
+  routes: [
+    {
+      transducer: route => {
+        const match = /^page2\/(.+)$/.exec(route);
+        return match ? { page: "page2", foo: match[1] } : null;
+      },
+      presenter: payload =>
+        payload.page === "page2" ? `page2/${payload.foo}` : null,
+      handler: payload =>
+        payload.page === "page2" && console.log("page2 handler")
     },
-    route => {
-      const match = /^page3\/(.+)$/.exec(route);
-      return match ? { page: "page3", bar: match[1] } : null;
+    {
+      transducer: route => {
+        const match = /^page3\/(.+)$/.exec(route);
+        return match ? { page: "page3", bar: match[1] } : null;
+      },
+      presenter: payload =>
+        payload.page === "page3" ? `page3/${payload.bar}` : null,
+      handler: payload =>
+        payload.page === "page3" && console.log("page3 handler")
     },
-    () => ({ page: "page1" })
-  ],
-  presenters: [
-    payload =>
-      payload.page === "page1"
-        ? "page1"
-        : payload.page === "page2"
-          ? `page2/${payload.foo}`
-          : payload.page === "page3"
-            ? `page3/${payload.bar}`
-            : null
-  ],
-  handlers: [
-    payload => payload.page === "page2" && console.log("page2 handler"),
-    payload => payload.page === "page3" && console.log("page3 handler"),
-    payload => payload.page === "page1" && console.log("page1 handler")
+    {
+      transducer: () => ({ page: "page1" }),
+      presenter: payload => (payload.page === "page1" ? "page1" : null),
+      handler: payload =>
+        payload.page === "page1" && console.log("page1 handler")
+    }
   ],
   deferer(payload) {
     if (payload.page === "page1") return true;

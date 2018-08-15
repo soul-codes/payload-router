@@ -6,10 +6,6 @@ interface IHistoryState<TPayload> {
   payload: TPayload;
 }
 
-enum HashChangeReason {
-  user = "user"
-}
-
 let counter = 0;
 
 export default class HistoryRouter<TPayload> extends Router<TPayload> {
