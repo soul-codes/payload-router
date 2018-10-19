@@ -4,7 +4,7 @@
   "description": "State-based router",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "repository": "https://github.com/soul-codes/ts-boilerplate",
+  "repository": "https://github.com/soul-codes/payload-router",
   "author": "soul-codes <reach.soul.codes@gmail.com>",
   "license": "MIT",
   "scripts": {
