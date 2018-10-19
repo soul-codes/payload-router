@@ -1,4 +1,4 @@
-import Router, { IRouterSettings } from "./Router";
+import Router, { RouterSettings } from "./Router";
 
 const $history = "history-router-state-b3ca3f75-de2f-4bb6-808a-4b7f88c0d2ce";
 interface IHistoryState<TPayload> {
@@ -12,7 +12,7 @@ export default class HistoryRouter<TPayload> extends Router<TPayload> {
   private _lastState: IHistoryState<TPayload> | null = null;
   private _isResolvingCancelledDefer = false;
 
-  constructor(settings: IRouterSettings<TPayload>) {
+  constructor(settings: RouterSettings<TPayload>) {
     super({
       ...settings
     });

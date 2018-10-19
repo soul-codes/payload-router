@@ -20,39 +20,39 @@ export enum RoutingState {
 
 type Falsy = null | false | void;
 
-export interface IRouteHandler<
+export interface RouteHandler<
   TPayload extends TOtherPayloads,
   TOtherPayloads = TPayload
 > {
-  (payload: TPayload, helpers: IRouteHandlerHelpers<TOtherPayloads>):
+  (payload: TPayload, helpers: RouteHandlerHelpers<TOtherPayloads>):
     | Promise<void>
     | Falsy;
 }
 
-export interface IRouteTransducer<TPayload> {
+export interface RouteTransducer<TPayload> {
   (routeString: string): TPayload | Falsy;
 }
 
-export interface IRoutePresenter<TPayload> {
+export interface RoutePresenter<TPayload> {
   (payload: TPayload): string | Falsy;
 }
 
-export interface IRouterStateThunks<TPayload> {
-  getState?(next: () => IRouterState<TPayload>): TPayload;
-  setState?(next: () => any, newState: IRouterState<TPayload>): any;
+export interface RouterStateThunks<TPayload> {
+  getState?(next: () => RouterState<TPayload>): TPayload;
+  setState?(next: () => any, newState: RouterState<TPayload>): any;
 }
 
-export interface IRouterDeferrer<TPayload> {
+export interface RouterDeferrer<TPayload> {
   (payload: TPayload): boolean | Promise<boolean>;
 }
 
-export interface IRouterState<TPayload> {
+export interface RouterState<TPayload> {
   routingState: RoutingState;
   nextPayload: TPayload | null;
   currentPayload: TPayload | null;
 }
 
-export interface IRouteHandlerHelpers<TPayload> {
+export interface RouteHandlerHelpers<TPayload> {
   redirect: (payload: TPayload) => Promise<void>;
   replace: (payload: TPayload) => void;
   handleCancel: (callback: () => any) => void;
@@ -64,22 +64,22 @@ type RecursiveArray<X> = MaybeRecursiveArray<X>[];
 type MaybeRecursiveArray<X> = X | Nest<X>;
 interface Nest<X> extends Array<MaybeRecursiveArray<X>> {}
 
-export interface IRouterSettings<TPayload> {
+export interface RouterSettings<TPayload> {
   routes: RecursiveArray<IRouteSettings<TPayload>>;
-  deferer?: IRouterDeferrer<TPayload>;
-  stateThunks?: IRouterStateThunks<TPayload>;
+  deferer?: RouterDeferrer<TPayload>;
+  stateThunks?: RouterStateThunks<TPayload>;
 }
 
 export interface IRouteSettings<TPayload> {
-  transducer: IRouteTransducer<TPayload>;
-  presenter: IRoutePresenter<TPayload>;
-  handler: IRouteHandler<TPayload>;
+  transducer: RouteTransducer<TPayload>;
+  presenter: RoutePresenter<TPayload>;
+  handler: RouteHandler<TPayload>;
 }
 
 const defaultThunk = (next: Function) => next();
 
 export default class Router<TPayload> {
-  private _state: IRouterState<TPayload> = {
+  private _state: RouterState<TPayload> = {
     routingState: RoutingState.resting,
     nextPayload: null,
     currentPayload: null
@@ -91,7 +91,7 @@ export default class Router<TPayload> {
   private _cancelCallbacks: (() => any)[] = [];
   private _payloadChangeCallbacks: (() => any)[] = [];
 
-  constructor(readonly settings: IRouterSettings<TPayload>) {}
+  constructor(readonly settings: RouterSettings<TPayload>) {}
 
   start(initialPayload: TPayload) {
     return this._activateNavigation(initialPayload);
@@ -271,7 +271,7 @@ export default class Router<TPayload> {
     this._payloadChangeCallbacks.forEach(callback => callback());
   }
 
-  private _setState(state: Partial<IRouterState<TPayload>>) {
+  private _setState(state: Partial<RouterState<TPayload>>) {
     const { stateThunks } = this.settings;
     const newState = { ...this._state, ...state };
     const next = () => (this._state = newState);
@@ -281,7 +281,7 @@ export default class Router<TPayload> {
     );
   }
 
-  private _getState(): IRouterState<TPayload> {
+  private _getState(): RouterState<TPayload> {
     const { stateThunks } = this.settings;
     const next = () => this._state;
     return ((stateThunks && stateThunks.getState) || <any>defaultThunk)(next);
@@ -291,7 +291,7 @@ export default class Router<TPayload> {
 export function transduceRegex<TPayload>(
   regex: RegExp,
   result: (...matches: string[]) => TPayload
-): IRouteTransducer<TPayload> {
+): RouteTransducer<TPayload> {
   return hash => {
     const matches = regex.exec(hash);
     if (!matches) return null;

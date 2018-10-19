@@ -1,7 +1,7 @@
 export { default as HistoryRouter } from "./HistoryRouter";
 export { default as Router } from "./Router";
-export { IRouteHandler, IRoutePresenter, IRouteTransducer } from "./Router";
-export { IRouteHandlerHelpers, IRouterSettings } from "./Router";
-export { IRouterDeferrer } from "./Router";
-export { RoutingState, IRouterStateThunks, IRouterState } from "./Router";
+export { RouteHandler, RoutePresenter, RouteTransducer } from "./Router";
+export { RouteHandlerHelpers, RouterSettings } from "./Router";
+export { RouterDeferrer } from "./Router";
+export { RoutingState, RouterStateThunks, RouterState } from "./Router";
 export { transduceRegex } from "./Router";
