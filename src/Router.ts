@@ -60,8 +60,12 @@ export interface IRouteHandlerHelpers<TPayload> {
   redirections: TPayload[];
 }
 
+type RecursiveArray<X> = MaybeRecursiveArray<X>[];
+type MaybeRecursiveArray<X> = X | Nest<X>;
+interface Nest<X> extends Array<MaybeRecursiveArray<X>> {}
+
 export interface IRouterSettings<TPayload> {
-  routes: IRouteSettings<TPayload>[];
+  routes: RecursiveArray<IRouteSettings<TPayload>>;
   deferer?: IRouterDeferrer<TPayload>;
   stateThunks?: IRouterStateThunks<TPayload>;
 }
@@ -112,7 +116,7 @@ export default class Router<TPayload> {
   }
 
   transduce(routeString: string): TPayload {
-    const { routes } = this.settings;
+    const { routes } = this;
     for (let i = 0, length = routes.length; i < length; i++) {
       const { transducer } = routes[i];
       const payload = transducer(routeString);
@@ -123,7 +127,7 @@ export default class Router<TPayload> {
   }
 
   present(payload: TPayload): string {
-    const { routes } = this.settings;
+    const { routes } = this;
     for (let i = 0, length = routes.length; i < length; i++) {
       const { presenter } = routes[i];
       const routeString = presenter(payload);
@@ -138,7 +142,7 @@ export default class Router<TPayload> {
     origin: TPayload | null,
     redirections: TPayload[]
   ): Promise<void> {
-    const { routes } = this.settings;
+    const { routes } = this;
     for (let i = 0, length = routes.length; i < length; i++) {
       const { handler } = routes[i];
       const helpers = {
@@ -183,6 +187,10 @@ export default class Router<TPayload> {
 
   get nextPayload() {
     return this._getState().nextPayload;
+  }
+
+  get routes() {
+    return flatten(this.settings.routes);
   }
 
   private _tryDeferNavigation(payload: TPayload) {
@@ -289,4 +297,16 @@ export function transduceRegex<TPayload>(
     if (!matches) return null;
     return result(...matches);
   };
+}
+
+function flatten<T>(array: RecursiveArray<T>): T[] {
+  let newArr = [] as T[];
+  array.forEach(a => {
+    if (Array.isArray(a)) {
+      newArr = newArr.concat(flatten(a));
+    } else {
+      newArr.splice(newArr.length, 0, a);
+    }
+  });
+  return newArr;
 }
