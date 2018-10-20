@@ -145,6 +145,7 @@ export default class Router<TPayload> {
     const { routes } = this;
     for (let i = 0, length = routes.length; i < length; i++) {
       const { handler } = routes[i];
+      if (!handler) continue;
       const helpers = {
         origin,
         redirections,
@@ -154,7 +155,7 @@ export default class Router<TPayload> {
         handleCancel: (cancelHandler: () => any) =>
           this._cancelHandlers.push(cancelHandler)
       };
-      const result = handler && handler(payload, helpers);
+      const result = handler(payload, helpers);
       if (result !== false)
         return result instanceof Promise ? result : Promise.resolve();
     }
