@@ -71,9 +71,9 @@ export interface RouterSettings<TPayload> {
 }
 
 export interface IRouteSettings<TPayload> {
-  transducer: RouteTransducer<TPayload>;
-  presenter: RoutePresenter<TPayload>;
-  handler: RouteHandler<TPayload>;
+  transducer?: RouteTransducer<TPayload>;
+  presenter?: RoutePresenter<TPayload>;
+  handler?: RouteHandler<TPayload>;
 }
 
 const defaultThunk = (next: Function) => next();
@@ -119,7 +119,7 @@ export default class Router<TPayload> {
     const { routes } = this;
     for (let i = 0, length = routes.length; i < length; i++) {
       const { transducer } = routes[i];
-      const payload = transducer(routeString);
+      const payload = transducer && transducer(routeString);
       if (payload) return payload;
     }
 
@@ -130,7 +130,7 @@ export default class Router<TPayload> {
     const { routes } = this;
     for (let i = 0, length = routes.length; i < length; i++) {
       const { presenter } = routes[i];
-      const routeString = presenter(payload);
+      const routeString = presenter && presenter(payload);
       if (routeString) return routeString;
     }
 
@@ -154,7 +154,7 @@ export default class Router<TPayload> {
         handleCancel: (cancelHandler: () => any) =>
           this._cancelHandlers.push(cancelHandler)
       };
-      const result = handler(payload, helpers);
+      const result = handler && handler(payload, helpers);
       if (result !== false)
         return result instanceof Promise ? result : Promise.resolve();
     }
