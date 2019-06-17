@@ -46,7 +46,7 @@ const router = new HistoryRouter<IPage1 | IPage2 | IPage3>({
     }
   ],
   deferer(payload) {
-    if (payload.page === "page1") return true;
+    if (payload.page === "page1" || payload.page === "page3") return true;
     return new Promise(resolve => {
       let done: (value: boolean) => void;
       const ok = document.createElement("button");
@@ -69,7 +69,15 @@ const router = new HistoryRouter<IPage1 | IPage2 | IPage3>({
   stateThunks: {
     setState(next, state) {
       next();
-      contentEl.textContent = JSON.stringify(state);
+      contentEl.innerHTML = `${JSON.stringify(
+        state
+      )} <button type="button" id="navigate">programmatically go to page 1</button>`;
+      const button = contentEl.querySelector("#navigate")!;
+      button.addEventListener("click", () =>
+        router.navigate({
+          page: "page1"
+        })
+      );
     }
   }
 });

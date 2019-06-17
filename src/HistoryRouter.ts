@@ -11,6 +11,7 @@ let counter = 0;
 export default class HistoryRouter<TPayload> extends Router<TPayload> {
   private _lastState: IHistoryState<TPayload> | null = null;
   private _isResolvingCancelledDefer = false;
+  private _isResolvingHashChange = false;
 
   constructor(settings: RouterSettings<TPayload>) {
     super({
@@ -25,6 +26,7 @@ export default class HistoryRouter<TPayload> extends Router<TPayload> {
     window.addEventListener("hashchange", () => {
       if (this._isResolvingCancelledDefer) return;
       const { payload } = this._ensureHistoryState();
+      this._isResolvingHashChange = true;
       this.navigate(payload).then(() => {});
     });
 
@@ -41,14 +43,14 @@ export default class HistoryRouter<TPayload> extends Router<TPayload> {
     const hash = "#" + this.routeString;
     let state = this._ensureHistoryState();
     state = { ...state, payload: this.payload };
-    if (ev.replace) {
+    if (ev.replace || this._isResolvingHashChange) {
       window.history.replaceState(state, "", hash);
     } else {
       window.history.pushState(state, "", hash);
     }
 
     this._lastState = state;
-    console.log("payload-change", window.history.state, this.payload);
+    this._isResolvingHashChange = false;
   }
 
   private _handleCancel() {
