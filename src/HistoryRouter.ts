@@ -17,7 +17,7 @@ export default class HistoryRouter<TPayload> extends Router<TPayload> {
       ...settings
     });
     this.onDefer(() => this._handleDefer());
-    this.onPayloadChange(() => this._handlePayloadChange());
+    this.onPayloadChange(ev => this._handlePayloadChange(ev));
     this.onCancel(() => this._handleCancel());
   }
 
@@ -33,19 +33,20 @@ export default class HistoryRouter<TPayload> extends Router<TPayload> {
     return super.start(payload);
   }
 
-  private _getPayloadFromHistory(): TPayload {
-    return this.transduce(dehash(window.location.hash));
-  }
-
   private _handleDefer() {
     console.log("defer", window.history.state, this.payload, this.nextPayload);
   }
 
-  private _handlePayloadChange() {
+  private _handlePayloadChange(ev: { replace: boolean }) {
     const hash = "#" + this.routeString;
     let state = this._ensureHistoryState();
     state = { ...state, payload: this.payload };
-    window.history.replaceState(state, void 0, hash);
+    if (ev.replace) {
+      window.history.replaceState(state, "", hash);
+    } else {
+      window.history.pushState(state, "", hash);
+    }
+
     this._lastState = state;
     console.log("payload-change", window.history.state, this.payload);
   }
@@ -74,7 +75,7 @@ export default class HistoryRouter<TPayload> extends Router<TPayload> {
     const { hash } = window.location;
     const payload = this.transduce(dehash(hash));
     state = { [$history]: ++counter, payload };
-    window.history.replaceState(state, void 0, hash);
+    window.history.replaceState(state, "", hash);
     return state;
   }
 }

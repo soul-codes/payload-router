@@ -39,7 +39,7 @@ export interface RoutePresenter<TPayload> {
 
 export interface RouterStateThunks<TPayload> {
   getState?(next: () => RouterState<TPayload>): TPayload;
-  setState?(next: () => any, newState: RouterState<TPayload>): any;
+  setState?(next: () => void, newState: RouterState<TPayload>): void;
 }
 
 export interface RouterDeferrer<TPayload> {
@@ -55,7 +55,7 @@ export interface RouterState<TPayload> {
 export interface RouteHandlerHelpers<TPayload> {
   redirect: (payload: TPayload) => Promise<void>;
   replace: (payload: TPayload) => void;
-  handleCancel: (callback: () => any) => void;
+  handleCancel: (callback: () => void) => void;
   origin: TPayload | null;
   redirections: TPayload[];
 }
@@ -85,11 +85,11 @@ export default class Router<TPayload> {
     currentPayload: null
   };
   private _promise: Promise<void> | null = null;
-  private _cancelHandlers: (() => any)[] = [];
+  private _cancelHandlers: (() => void)[] = [];
   private _origin: TPayload | null = null;
-  private _deferCallbacks: (() => any)[] = [];
-  private _cancelCallbacks: (() => any)[] = [];
-  private _payloadChangeCallbacks: (() => any)[] = [];
+  private _deferCallbacks: (() => void)[] = [];
+  private _cancelCallbacks: (() => void)[] = [];
+  private _payloadChangeCallbacks: ((ev: { replace: boolean }) => void)[] = [];
 
   constructor(readonly settings: RouterSettings<TPayload>) {}
 
@@ -152,7 +152,7 @@ export default class Router<TPayload> {
         redirect: (payload: TPayload) =>
           this._redirect(payload, origin, redirections),
         replace: (target: TPayload) => this._replace(target),
-        handleCancel: (cancelHandler: () => any) =>
+        handleCancel: (cancelHandler: () => void) =>
           this._cancelHandlers.push(cancelHandler)
       };
       const result = handler(payload, helpers);
@@ -162,15 +162,15 @@ export default class Router<TPayload> {
     throw Error("Route payload was not handled.");
   }
 
-  onDefer(callback: () => any) {
+  onDefer(callback: () => void) {
     this._deferCallbacks.push(callback);
   }
 
-  onPayloadChange(callback: () => any) {
+  onPayloadChange(callback: (ev: { replace: boolean }) => void) {
     this._payloadChangeCallbacks.push(callback);
   }
 
-  onCancel(callback: () => any) {
+  onCancel(callback: () => void) {
     this._cancelCallbacks.push(callback);
   }
 
@@ -240,7 +240,9 @@ export default class Router<TPayload> {
       routingState: RoutingState.active
     });
 
-    this._payloadChangeCallbacks.forEach(callback => callback());
+    this._payloadChangeCallbacks.forEach(callback =>
+      callback({ replace: false })
+    );
     const result = this.handle(payload, lastPayload, []);
     if (result instanceof Promise) {
       this._promise = result.then(() => {
@@ -269,7 +271,9 @@ export default class Router<TPayload> {
 
   private _replace(payload: TPayload) {
     this._setState({ ...this._state, currentPayload: payload });
-    this._payloadChangeCallbacks.forEach(callback => callback());
+    this._payloadChangeCallbacks.forEach(callback =>
+      callback({ replace: true })
+    );
   }
 
   private _setState(state: Partial<RouterState<TPayload>>) {
