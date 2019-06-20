@@ -260,12 +260,10 @@ export default class Router<TPayload> {
     origin: TPayload | null,
     redirections: TPayload[]
   ) {
+    const currentPayload = this._state.currentPayload!;
     this._replace(payload);
     return Promise.resolve(
-      this.handle(payload, origin, [
-        ...redirections,
-        <TPayload>this._state.currentPayload
-      ])
+      this.handle(payload, origin, [...redirections, currentPayload])
     );
   }
 
